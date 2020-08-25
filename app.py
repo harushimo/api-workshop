@@ -1,11 +1,20 @@
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask_sqlalchemy import SQLAlchemy
 from yahooquery import Ticker
+from database import db, Stock, Portfolio
+
 import json
 
-
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stock.db'
+db.init_app(app)
+db.app = app
+
+#Creating Database
+db.create_all()
+
 
 @app.route('/')
 def stock_portfolio():

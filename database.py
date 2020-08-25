@@ -4,14 +4,14 @@ Initial database setup for the portfolio and stock symbols
 
 import os
 import sys
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
-Base = declarative_base()
+db = SQLAlchemy()
 
-class Stock(Base):
+class Stock(db.Model):
     """
     Creates the stock database
     """
@@ -21,17 +21,15 @@ class Stock(Base):
     close_price = Column(Integer, nullable=False)
 
 
-class Portfolio(Base):
+class Portfolio(db.Model):
     """
     Portfolio database
     """
     __tablename = 'portfolio'
-    portfolio_name = Column(String(500), primar_key = True)
+    portfolio_name = Column(String(500), primary_key = True)
     stocks =  Column(String(500), nullable = False)
     descripition = Column(String(500), nullable= False)
 
 
-# Create Engine
-engine = 'postgresql://'
 
 
