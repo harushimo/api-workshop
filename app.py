@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import jsonify
 from flask import request
+from flask_api import status
 from flask_sqlalchemy import SQLAlchemy
 from yahooquery import Ticker
 from database import db, Stock, Portfolio
@@ -30,20 +31,29 @@ def retrieve_stock_quote():
     return jsonify(stock_ticker.summary_detail)
 
 
-@app.route('/stock-symbols/portfolios', methods=['POST'])
+@app.route('/portfolios', methods=['POST'])
 def create_portfolios():
     """
     Creates the stock portfolio
     """
-    portolio = retrieve_stock_quote()
-    print(portolio)
-    return portolio
+    rec_data = json.loads(request.data)
+    stock_info = Ticker(rec_data['stocks'])
+    print(stock_info)
+    newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
+                                  stocks = [],
+                                  description = rec_data['description'])
+    db.session.add(newPortfolio)
+    db.session.commit()
+    return jsonify({'message' : 'portfolio has been created'}), status.HTTP_201_CREATED
 
-
-@app.route('/test3')
-def test_site_3():
-    return "You are the test endpoint 3"
-
+# @app.route('/portfolios', methods = ['DELETE'])
+# def delete_portfolio():
+#     """
+#     Deletes stock portfolio
+#     """
+#     db.session.delete(newPortfolio)
+#     db.session.commit()
+    
 
 if __name__ == "__main__":
     app.run()
