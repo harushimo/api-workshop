@@ -5,8 +5,8 @@ from flask_api import status
 from flask_sqlalchemy import SQLAlchemy
 from yahooquery import Ticker
 from database import db, Stock, Portfolio
-
 import json
+import uuid
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stock.db'
@@ -40,8 +40,9 @@ def create_portfolios():
     stock_info = Ticker(rec_data['stocks'])
     print((stock_info))
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
-                                  stocks = [],
-                                  description = rec_data['description'])
+                              portfolio_id = str(uuid.uuid4()),
+                              stocks = [],
+                              description = rec_data['description'])
     db.session.add(newPortfolio)
     db.session.commit()
     return jsonify({'message' : 'portfolio has been created'}), status.HTTP_201_CREATED
@@ -51,18 +52,37 @@ def get_portfolios():
     """
     This will generate URLs for all the portfolios
     """
-    portfolio_names = db.session.query(Portfolio).all()
-    return json.dumps([p for p in portfolio_names])
+    portfolios = db.session.query(Portfolio).all()
+    res = []
+    for p in portfolios:
+        d = dict()
+        d['name'] = p.portfolio_name
+        d['url'] = f"http://localhost:5000/portfolios/{p.portfolio_id}"
+        res.append(d)
+    return json.dumps(res)
+  
     
+# TO DO Read Flask SQL ALCHEMY API
+# TO DO URLLIB2 testing
+@app.route('/portfolios/<string:p_id>', methods=['GET'])
+def get_portfolio(p_id):
+    """
+    This will retrieve single a portfolio information
+    """
+    p = Portfolio.query.filter_by(portfolio_id = p_id).first()
+    stocks = Stock.query.join(PortfolioStocks).filter(Stock.id = PortfolioStocks.stock_id).filter_by(PortfolioStocks.portfolio_id == p_id).all()
+    d = dict()
+    d['portfolio_name'] = p.portfolio_name
+    d['stocks'] = []
+    for s in stocks:
+        stock = dict()
+        stock['stock_symbol'] = s.stock_symbol
+        stock['open_price'] = s.open_price
+        stock['close_price'] = s.close_price
+        d['stocks'].append(stock)
+    d['description'] = p.description
+    return d
 
-# @app.route('/portfolios/<string:portfolio_id>', methods=['GET'])
-# def get_portfolio(portfolio_id):
-#     """
-#     This will retrieve the portfolio information
-#     """
-
-
-    
 
 # @app.route('/portfolios', methods=['POST'])
 # def update_portfolio():

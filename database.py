@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import create_engine
+import uuid
 
 db = SQLAlchemy()
 
@@ -29,21 +30,10 @@ class Portfolio(db.Model):
     """
     __tablename__ = 'portfolio'
     id = Column(Integer, primary_key=True)
+    portfolio_id = Column(String(20), unique=True, nullable=False)
     portfolio_name = Column(String(500),nullable=False)
     stocks =  relationship("Stock", secondary="portfolio_stocks")
     description = Column(String(500), nullable= False)
-
-    @property
-    def serialize(self):
-        """
-        This is return a serialize portfolio object
-        """
-        return {
-            'id': self.id,
-            'portfolio_name': self.portfolio_name,
-            'stocks': self.stocks,
-            'description': self.description
-        }
 
 class PortfolioStocks(db.Model):
     """
