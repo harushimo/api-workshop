@@ -38,13 +38,38 @@ def create_portfolios():
     """
     rec_data = json.loads(request.data)
     stock_info = Ticker(rec_data['stocks'])
-    print(stock_info)
+    print((stock_info))
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
                                   stocks = [],
                                   description = rec_data['description'])
     db.session.add(newPortfolio)
     db.session.commit()
     return jsonify({'message' : 'portfolio has been created'}), status.HTTP_201_CREATED
+
+@app.route('/portfolios', methods=['GET'])
+def get_portfolios():
+    """
+    This will generate URLs for all the portfolios
+    """
+    portfolio_names = db.session.query(Portfolio).all()
+    return json.dumps([p for p in portfolio_names])
+    
+
+# @app.route('/portfolios/<string:portfolio_id>', methods=['GET'])
+# def get_portfolio(portfolio_id):
+#     """
+#     This will retrieve the portfolio information
+#     """
+
+
+    
+
+# @app.route('/portfolios', methods=['POST'])
+# def update_portfolio():
+#     """
+#     Updates the portfolio with new stocks
+#     """
+
 
 # @app.route('/portfolios', methods = ['DELETE'])
 # def delete_portfolio():
