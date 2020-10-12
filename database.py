@@ -33,6 +33,18 @@ class Portfolio(db.Model):
     stocks =  relationship("Stock", secondary="portfolio_stocks")
     description = Column(String(500), nullable= False)
 
+    @property
+    def serialize(self):
+        """
+        This is return a serialize portfolio object
+        """
+        return {
+            'id': self.id,
+            'portfolio_name': self.portfolio_name,
+            'stocks': self.stocks,
+            'description': self.description
+        }
+
 class PortfolioStocks(db.Model):
     """
     Junction Table to represent M:N relationship between stocks and portfolios
