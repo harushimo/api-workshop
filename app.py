@@ -4,7 +4,7 @@ from flask import request
 from flask_api import status
 from flask_sqlalchemy import SQLAlchemy
 from yahooquery import Ticker
-from database import db, Stock, Portfolio
+from database import db, Stock, Portfolio, PortfolioStocks
 import json
 import uuid
 
@@ -37,6 +37,7 @@ def create_portfolios():
     Creates the stock portfolio
     """
     rec_data = json.loads(request.data)
+    print(json.loads(request.data))
     stock_info = Ticker(rec_data['stocks'])
     print((stock_info))
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
@@ -70,7 +71,7 @@ def get_portfolio(p_id):
     This will retrieve single a portfolio information
     """
     p = Portfolio.query.filter_by(portfolio_id = p_id).first()
-    stocks = Stock.query.join(PortfolioStocks).filter(Stock.id = PortfolioStocks.stock_id).filter_by(PortfolioStocks.portfolio_id == p_id).all()
+    stocks = Stock.query.join(PortfolioStocks).filter(Stock.id == PortfolioStocks.stock_id).filter(PortfolioStocks.portfolio_id == p_id).all()
     d = dict()
     d['portfolio_name'] = p.portfolio_name
     d['stocks'] = []
