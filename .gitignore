@@ -1,3 +1,4 @@
 workshop/
 __pycache__/
 stock.db
+.vscode/
