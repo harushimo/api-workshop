@@ -7,6 +7,8 @@ from yahooquery import Ticker
 from database import db, Stock, Portfolio, PortfolioStocks
 import json
 import uuid
+import pprint
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stock.db'
@@ -28,9 +30,28 @@ def retrieve_stock_quote():
     """
     stock_symbols = request.data.decode('utf-8')
     stock_ticker = Ticker(stock_symbols)
-    return jsonify(stock_ticker.summary_detail)
+    stock_summary = stock_ticker.summary_detail
+    stock_object(stock_summary)
+    return jsonify(stock_summary)
 
-
+def stock_object(stock_summary):
+    """
+    This is to create stock object
+    """
+    stock_quote = stock_summary
+    for key,value in stock_quote.items():
+        stock_list = dict()
+        stock_list['stock_symbol'] = key
+        stock_list['open_price'] = value['open']
+        stock_list['close_price'] = value['previousClose']
+        stock_table = Stock(stock_symbol = stock_list['stock_symbol'],
+                            open_price = stock_list['open_price'],
+                            close_price = stock_list['close_price'])
+        db.session.add(stock_table)
+    db.session.commit()
+    pprint.pprint(stock_quote)
+    pprint.pprint(stock_list)
+   
 @app.route('/portfolios', methods=['POST'])
 def create_portfolios():
     """
@@ -38,8 +59,8 @@ def create_portfolios():
     """
     rec_data = json.loads(request.data)
     print(json.loads(request.data))
-    stock_info = Ticker(rec_data['stocks'])
-    print((stock_info))
+    # stock_info = stock_object(rec_data['stocks'])
+    # print(stock_info)
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
                               portfolio_id = str(uuid.uuid4()),
                               stocks = [],
@@ -71,7 +92,7 @@ def get_portfolio(p_id):
     This will retrieve single a portfolio information
     """
     p = Portfolio.query.filter_by(portfolio_id = p_id).first()
-    stocks = Stock.query.join(PortfolioStocks).filter(Stock.id == PortfolioStocks.stock_id).filter(PortfolioStocks.portfolio_id == p_id).all()
+    stocks = Stock.query.join(PortfolioStocks).filter(Stock.id == PortfolioStocks.stock_id).filter(PortfolioStocks.portfolio_id == p.id).all()
     d = dict()
     d['portfolio_name'] = p.portfolio_name
     d['stocks'] = []
