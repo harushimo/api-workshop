@@ -59,11 +59,11 @@ def create_portfolios():
     """
     rec_data = json.loads(request.data)
     print(json.loads(request.data))
-    # stock_info = stock_object(rec_data['stocks'])
-    # print(stock_info)
+    stock_info = rec_data['stocks']
+    print(stock_info)
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
                               portfolio_id = str(uuid.uuid4()),
-                              stocks = [],
+                              stocks = stock_info,
                               description = rec_data['description'])
     db.session.add(newPortfolio)
     db.session.commit()
