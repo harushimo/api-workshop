@@ -9,6 +9,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import create_engine
 import uuid
+from stock_api import get_stock_info
 
 db = SQLAlchemy()
 
@@ -34,6 +35,19 @@ class Portfolio(db.Model):
     portfolio_name = Column(String(500),nullable=False)
     stocks =  relationship("Stock", secondary="portfolio_stocks")
     description = Column(String(500), nullable= False)
+
+    def update(self, json_obj):
+        if 'portfolio_name' in json_obj:
+            self.portfolio_name = json_obj['portfolio_name']
+        if 'stocks' in json_obj:
+             stock_dicts = get_stock_info(json_obj['stocks'])
+             for obj in stock_dicts:
+                 self.stocks.append(Stock(stock_symbol = obj['stock_symbol'],
+                                   open_price = obj['open_price'],
+                                   close_price = obj['close_price']))
+        if 'description' in json_obj:
+            self.description = json_obj['description']
+    
 
 class PortfolioStocks(db.Model):
     """
