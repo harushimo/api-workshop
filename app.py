@@ -10,7 +10,6 @@ import uuid
 import pprint
 from stock_api import get_stock_info
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///stock.db'
 db.init_app(app)
@@ -18,7 +17,6 @@ db.app = app
 
 #Creating Database
 db.create_all()
-
 
 @app.route('/')
 def stock_portfolio():
@@ -42,7 +40,6 @@ def create_portfolios():
     print(json.loads(request.data))
     stock_info = rec_data['stocks']
     stock_dicts = get_stock_info(stock_info)
-    pprint.pprint(stock_dicts)
     stock_objs = []
     for obj in stock_dicts:
         stock_objs.append(Stock(stock_symbol = obj['stock_symbol'],
@@ -89,7 +86,6 @@ def get_portfolio(p_id):
     d['description'] = p.description
     return d
 
-
 @app.route('/portfolios/<string:p_id>', methods=['PUT'])
 def update_portfolio(p_id):
     """
@@ -102,16 +98,14 @@ def update_portfolio(p_id):
     return jsonify({'message' : 'portfolio has been updated'}), status.HTTP_201_CREATED
 
 
-
 @app.route('/portfolios/<string:p_id>', methods = ['DELETE'])
 def delete_portfolio(p_id):
     """
     Deletes stock portfolio
     """
-    print("We are in the delete portfolio")
     p = Portfolio.query.filter_by(portfolio_id = p_id).first()
     db.session.delete(p)
-    db.session.commit   
+    db.session.commit()   
     return jsonify({'message' : 'portfolio has been deleted'}), status.HTTP_200_OK
 
 
