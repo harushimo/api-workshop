@@ -8,6 +8,7 @@ from database import db, Stock, Portfolio, PortfolioStocks
 import json
 import uuid
 import pprint
+from stock_api import get_stock_info
 
 
 app = Flask(__name__)
@@ -29,28 +30,8 @@ def retrieve_stock_quote():
     Retrieve stock quotes
     """
     stock_symbols = request.data.decode('utf-8')
-    stock_ticker = Ticker(stock_symbols)
-    stock_summary = stock_ticker.summary_detail
-    stock_object(stock_summary)
-    return jsonify(stock_summary)
+    return jsonify(stock_object(stock_symbols))
 
-def stock_object(stock_summary):
-    """
-    This is to create stock object
-    """
-    stock_quote = stock_summary
-    for key,value in stock_quote.items():
-        stock_list = dict()
-        stock_list['stock_symbol'] = key
-        stock_list['open_price'] = value['open']
-        stock_list['close_price'] = value['previousClose']
-        stock_table = Stock(stock_symbol = stock_list['stock_symbol'],
-                            open_price = stock_list['open_price'],
-                            close_price = stock_list['close_price'])
-        db.session.add(stock_table)
-    db.session.commit()
-    pprint.pprint(stock_quote)
-    pprint.pprint(stock_list)
    
 @app.route('/portfolios', methods=['POST'])
 def create_portfolios():
@@ -60,10 +41,16 @@ def create_portfolios():
     rec_data = json.loads(request.data)
     print(json.loads(request.data))
     stock_info = rec_data['stocks']
-    print(stock_info)
+    stock_dicts = get_stock_info(stock_info)
+    pprint.pprint(stock_dicts)
+    stock_objs = []
+    for obj in stock_dicts:
+        stock_objs.append(Stock(stock_symbol = obj['stock_symbol'],
+                            open_price = obj['open_price'],
+                            close_price = obj['close_price']))
     newPortfolio =  Portfolio(portfolio_name = rec_data['portfolio_name'],
                               portfolio_id = str(uuid.uuid4()),
-                              stocks = stock_info,
+                              stocks = stock_objs,
                               description = rec_data['description'])
     db.session.add(newPortfolio)
     db.session.commit()
@@ -83,9 +70,6 @@ def get_portfolios():
         res.append(d)
     return json.dumps(res)
   
-    
-# TO DO Read Flask SQL ALCHEMY API
-# TO DO URLLIB2 testing
 @app.route('/portfolios/<string:p_id>', methods=['GET'])
 def get_portfolio(p_id):
     """
@@ -106,21 +90,30 @@ def get_portfolio(p_id):
     return d
 
 
-# @app.route('/portfolios', methods=['POST'])
-# def update_portfolio():
-#     """
-#     Updates the portfolio with new stocks
-#     """
+@app.route('/portfolios/<string:p_id>', methods=['PUT'])
+def update_portfolio(p_id):
+    """
+    Updates the portfolio with new stocks
+    """
+    p = Portfolio.query.filter_by(portfolio_id = p_id).first()
+    rec_data = json.loads(request.data)
+    p.update(rec_data)
+    db.session.commit()
+    return jsonify({'message' : 'portfolio has been updated'}), status.HTTP_201_CREATED
 
 
-# @app.route('/portfolios', methods = ['DELETE'])
-# def delete_portfolio():
-#     """
-#     Deletes stock portfolio
-#     """
-#     db.session.delete(newPortfolio)
-#     db.session.commit()
-    
+
+@app.route('/portfolios/<string:p_id>', methods = ['DELETE'])
+def delete_portfolio(p_id):
+    """
+    Deletes stock portfolio
+    """
+    print("We are in the delete portfolio")
+    p = Portfolio.query.filter_by(portfolio_id = p_id).first()
+    db.session.delete(p)
+    db.session.commit   
+    return jsonify({'message' : 'portfolio has been deleted'}), status.HTTP_200_OK
+
 
 if __name__ == "__main__":
     app.run()
