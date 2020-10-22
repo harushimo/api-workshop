@@ -97,7 +97,6 @@ def update_portfolio(p_id):
     db.session.commit()
     return jsonify({'message' : 'portfolio has been updated'}), status.HTTP_201_CREATED
 
-
 @app.route('/portfolios/<string:p_id>', methods = ['DELETE'])
 def delete_portfolio(p_id):
     """
@@ -107,7 +106,6 @@ def delete_portfolio(p_id):
     db.session.delete(p)
     db.session.commit()   
     return jsonify({'message' : 'portfolio has been deleted'}), status.HTTP_200_OK
-
 
 if __name__ == "__main__":
     app.run()
