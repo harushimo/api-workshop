@@ -21,6 +21,7 @@ This will create a copy of repository. Once you have a copy, you can clone the r
 
 ### Option 2
 Clone the repo on your local machine by clicking the code button
+
 ![code-image](code.png)
 
 After clicking the button, select HTTPS option and use the command below:
