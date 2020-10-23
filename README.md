@@ -1,4 +1,4 @@
-# Application Programming Interface (API)  Workshop
+# Application Programming Interface (API)  Workshop Solution
 
 Welcome to Application Programming Interface (API) Workshop.  API allows communication from one software application to another software application. You will be building an API using Python - Flask.  
 
