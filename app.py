@@ -28,7 +28,7 @@ def retrieve_stock_quote():
     Retrieve stock quotes
     """
     stock_symbols = request.data.decode('utf-8')
-    return jsonify(stock_object(stock_symbols))
+    return jsonify(get_stock_info(stock_symbols))
 
    
 @app.route('/portfolios', methods=['POST'])
